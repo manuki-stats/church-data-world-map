@@ -26,42 +26,24 @@ if (!webshot::is_phantomjs_installed()) {
 # Set Shiny app to listen on all interfaces and a specific port for Docker compatibility.
 
 options(shiny.host = "0.0.0.0")
-options(shiny.port = 3838)
+options(shiny.port = 3838) # Also 8180 is a valid option
+
 
 # ---- Load the Data ----
-message("Current working directory: ", getwd())
-message("Files in current directory: ", paste(list.files(), collapse = ", "))
-
-tryCatch({
-  message("Checking for Docker file: ", file.exists("/srv/shiny-server/final_geo_table.csv"))
-  if (file.exists("/srv/shiny-server/final_geo_table.csv")) {
-    # Docker environment
-    message("Setting wd to /srv/shiny-server")
-    setwd("/srv/shiny-server")
-    message("New wd: ", getwd())
-    message("Files after setwd: ", paste(list.files(), collapse = ", "))
-    data <- read.csv("final_geo_table.csv", check.names = FALSE)
-    abbreviations_file <- "variable_abbreviations.csv"
-    message("Abbreviations file path: ", abbreviations_file)
-    message("Abbreviations file exists: ", file.exists(abbreviations_file))
-  } else {
-    # Local development environment
-    path_outputs <- "C:/Users/schia/Documents/GitHub/Consulting_Catholic_Church"  # Update to your actual local path if needed
-    message("Setting wd to local path: ", path_outputs)
-    setwd(path_outputs)
-    message("New wd: ", getwd())
-    message("Files after setwd: ", paste(list.files(), collapse = ", "))
-    data <- read.csv("final_geo_table.csv", check.names = FALSE)
-    abbreviations_file <- file.path(path_outputs, "variable_abbreviations.csv")
-    message("Abbreviations file path: ", abbreviations_file)
-    message("Abbreviations file exists: ", file.exists(abbreviations_file))
-  }
-  # If your script loads abbreviations_file later, add similar checks there
-  # Rest of your app code...
-}, error = function(e) {
-  message("Error during data load: ", e$message)
-  stop("App initialization failed.")
-})
+# Update paths for Docker environment
+if (file.exists("/srv/shiny-server/final_geo_table.csv")) {
+  # Docker environment
+  setwd("/srv/shiny-server")
+  data <- read.csv("final_geo_table.csv", check.names = FALSE)
+  abbreviations_file <- "variable_abbreviations.csv"
+} else {
+  # Local development environment
+  #path_outputs <- "C:/Users/schia/Documents/GitHub/Consulting_Catholic_Church"
+  path_outputs <- "C:/Users/soffi/Documents/Consulting_Catholic_Church"
+  setwd(path_outputs)
+  data <- read.csv("final_geo_table.csv", check.names = FALSE)
+  abbreviations_file <- file.path(path_outputs, "variable_abbreviations.csv")
+}
 
 # ---- Define Variable Abbreviations ----
 if (!file.exists(abbreviations_file)) {
