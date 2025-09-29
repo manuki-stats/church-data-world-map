@@ -1,0 +1,13 @@
+services:
+  shiny-map-app:
+    build: .
+    ports:
+      - "3840:3838"
+    volumes:
+      - ./final_geo_table.csv:/srv/shiny-server/final_geo_table.csv
+      - ./variable_abbreviations.csv:/srv/shiny-server/variable_abbreviations.csv
+      - ./map.R:/srv/shiny-server/app.R
+      - ./styles.css:/srv/shiny-server/styles.css
+    restart: unless-stopped
+    environment:
+      - APPLICATION_LOGS_TO_STDOUT=true
