@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
-    libv8-dev \
+    libnode-dev \
     libudunits2-dev \
     libgdal-dev \
     libgeos-dev \
