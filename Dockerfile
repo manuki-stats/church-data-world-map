@@ -52,8 +52,9 @@ RUN wget -q https://commondatastorage.googleapis.com/chromium-browser-snapshots/
     && rm chrome-linux.zip
 ENV CHROMOTE_CHROME=/usr/bin/chromium
 # Install required R packages (including spatial packages), replace webshot with webshot2
+# Install required R packages (including spatial packages), replace webshot with webshot2
 RUN R -e "options(repos = c(CRAN = 'https://p3m.dev/cran/__linux__/jammy/latest')); \
-    install.packages(c('shiny', 'leaflet', 'dplyr', 'readr', 'sf', 'DT', 'shinythemes', 'lwgeom', 'rnaturalearth', 'rnaturalearthdata', 'RColorBrewer', 'webshot2', 'writexl', 'plotly', 'shinyjs', 'viridisLite', 'ggplot2', 'htmlwidgets', 'purrr'))"
+    install.packages(c('shiny', 'leaflet', 'dplyr', 'readr', 'sf', 'DT', 'shinythemes', 'lwgeom', 'rnaturalearth', 'rnaturalearthdata', 'RColorBrewer', 'webshot2', 'writexl', 'plotly', 'shinyjs', 'viridisLite', 'ggplot2', 'htmlwidgets', 'purrr', 'mapview'))"
 # Remove default shiny apps
 RUN rm -rf /srv/shiny-server/*
 # Copy your app files

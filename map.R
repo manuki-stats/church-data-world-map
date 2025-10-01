@@ -1631,12 +1631,19 @@ server <- function(input, output, session) {
         document.head.appendChild(style);
       }
     ")
-      temp_html <- tempfile(fileext = ".html")
-      saveWidget(leaflet_obj, temp_html, selfcontained = TRUE)
-      webshot2::webshot(temp_html, file = file, vwidth = 1600, vheight = 1000, 
-                        zoom = 1.5, delay = 2, browser_args = c("--no-sandbox", "--disable-gpu", "--disable-software-rasterizer", "--disable-dev-shm-usage"))
-    }
-  )
+      cat("Leaflet object created successfully.\n")
+      mapview::mapshot2(leaflet_obj, file = file, vwidth = 1600, vheight = 1000, delay = 5, 
+                        browser_args = c("--no-sandbox", "--disable-gpu", "--disable-software-rasterizer", "--disable-dev-shm-usage"),
+                        remove_controls = c("zoomControl", "layersControl", "homeButton", "scaleBar", "drawToolbar", "easyButton"))
+      cat("Mapshot completed successfully.\n")
+    }, error = function(e) {
+      cat("Error in download process: ", e$message, "\n")
+      # Create a placeholder error image if possible
+      png(file)
+      plot.new()
+      text(0.5, 0.5, "Error generating map: " %+% e$message, col = "red")
+      dev.off()
+    })
   
   
   # ---- Time Series Region Selector UI ----
