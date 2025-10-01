@@ -12,4 +12,4 @@ services:
     restart: unless-stopped
     environment:
       - APPLICATION_LOGS_TO_STDOUT=true
-      - SHINY_APP_INIT_TIMEOUT=180
+      - SHINY_APP_INIT_TIMEOUT=300
