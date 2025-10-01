@@ -1,6 +1,6 @@
 # Use the official Rocker Shiny image as base
 FROM rocker/shiny:latest
-# Install system dependencies for spatial packages
+# Install system dependencies for spatial packages and headless Chrome (for webshot2)
 RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libssl-dev \
@@ -15,13 +15,38 @@ RUN apt-get update && apt-get install -y \
     wget \
     libfontconfig1 \
     libfreetype6 \
+    chromium-browser \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libatspi2.0-0 \
+    libcairo2 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libx11-6 \
+    libxcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxrandr2 \
+    libxrender1 \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libxshmfence1 \
+    lsb-release \
+    xdg-utils \
     && rm -rf /var/lib/apt/lists/*
-# Install required R packages (including spatial packages)
+# Install required R packages (including spatial packages), replace webshot with webshot2
 RUN R -e "options(repos = c(CRAN = 'https://p3m.dev/cran/__linux__/noble/latest')); \
-    install.packages(c('shiny', 'leaflet', 'dplyr', 'readr', 'sf', 'DT', 'shinythemes', 'lwgeom', 'rnaturalearth', 'rnaturalearthdata', 'RColorBrewer', 'webshot', 'writexl', 'plotly', 'shinyjs', 'viridisLite', 'ggplot2', 'htmlwidgets', 'purrr'))"
-# Install PhantomJS manually for webshot functionality
-RUN R -e "webshot::install_phantomjs()"
-RUN cp /root/bin/phantomjs /usr/local/bin/ && chmod +x /usr/local/bin/phantomjs
+    install.packages(c('shiny', 'leaflet', 'dplyr', 'readr', 'sf', 'DT', 'shinythemes', 'lwgeom', 'rnaturalearth', 'rnaturalearthdata', 'RColorBrewer', 'webshot2', 'writexl', 'plotly', 'shinyjs', 'viridisLite', 'ggplot2', 'htmlwidgets', 'purrr'))"
 # Remove default shiny apps
 RUN rm -rf /srv/shiny-server/*
 # Copy your app files

@@ -12,7 +12,7 @@ library(lwgeom)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(RColorBrewer)
-library(webshot)
+library(webshot2)
 library(writexl)
 library(plotly)
 library(shinyjs)
@@ -1578,7 +1578,7 @@ server <- function(input, output, session) {
       filtered_data <- filtered_map_data()
       pal <- create_pal(filtered_data[[input$variable]])
       leaflet_obj <- leaflet(filtered_data) %>%
-        fitBounds(-180, -60, 180, 90) %>%
+        fitBounds(-180, -60, 180, 90) %>%  # Adjusted for better world framing without tiles
         addPolygons(
           fillColor = ~pal(filtered_data[[input$variable]]),
           color = "white", weight = 1, opacity = 0.45, fillOpacity = 0.6,
@@ -1633,7 +1633,7 @@ server <- function(input, output, session) {
     ")
       temp_html <- tempfile(fileext = ".html")
       saveWidget(leaflet_obj, temp_html, selfcontained = TRUE)
-      webshot::webshot(temp_html, file = file, vwidth = 1600, vheight = 900, delay = 2, zoom = 1.5)
+      webshot2::webshot(temp_html, file = file, vwidth = 1600, vheight = 1000, zoom = 1.5, delay = 2)
     }
   )
   
