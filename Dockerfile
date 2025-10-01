@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libxrender1 \
     fonts-liberation \
-    libappindicator3-1 \
+    libayatana-appindicator3-1 \
     libasound2 \
     libxshmfence1 \
     lsb-release \
