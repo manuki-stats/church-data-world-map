@@ -10,6 +10,7 @@ services:
       - ./styles.css:/srv/shiny-server/styles.css
       - ./tmp:/tmp
     restart: unless-stopped
+    shm_size: '1gb'
     environment:
       - APPLICATION_LOGS_TO_STDOUT=true
       - SHINY_APP_INIT_TIMEOUT=300
