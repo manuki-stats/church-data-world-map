@@ -44,6 +44,7 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
+ENV CHROMOTE_CHROME=/usr/bin/chromium
 # Install required R packages (including spatial packages), replace webshot with webshot2
 RUN R -e "options(repos = c(CRAN = 'https://p3m.dev/cran/__linux__/bookworm/latest')); \
     install.packages(c('shiny', 'leaflet', 'dplyr', 'readr', 'sf', 'DT', 'shinythemes', 'lwgeom', 'rnaturalearth', 'rnaturalearthdata', 'RColorBrewer', 'webshot2', 'writexl', 'plotly', 'shinyjs', 'viridisLite', 'ggplot2', 'htmlwidgets', 'purrr'))"
