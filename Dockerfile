@@ -1,5 +1,5 @@
 # Use the official Rocker Shiny image as base
-FROM rocker/shiny:latest
+FROM rocker/shiny:4.3.3
 # Install system dependencies for spatial packages and headless Chrome (for webshot2)
 RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     libfontconfig1 \
     libfreetype6 \
-    chromium \
+    chromium-browser \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
     libatspi2.0-0 \
@@ -38,15 +38,15 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libxrender1 \
     fonts-liberation \
-    libayatana-appindicator3-1 \
+    libappindicator3-1 \
     libasound2 \
     libxshmfence1 \
     lsb-release \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
-ENV CHROMOTE_CHROME=/usr/bin/chromium
+ENV CHROMOTE_CHROME=/usr/bin/chromium-browser
 # Install required R packages (including spatial packages), replace webshot with webshot2
-RUN R -e "options(repos = c(CRAN = 'https://p3m.dev/cran/__linux__/bookworm/latest')); \
+RUN R -e "options(repos = c(CRAN = 'https://p3m.dev/cran/__linux__/jammy/latest')); \
     install.packages(c('shiny', 'leaflet', 'dplyr', 'readr', 'sf', 'DT', 'shinythemes', 'lwgeom', 'rnaturalearth', 'rnaturalearthdata', 'RColorBrewer', 'webshot2', 'writexl', 'plotly', 'shinyjs', 'viridisLite', 'ggplot2', 'htmlwidgets', 'purrr'))"
 # Remove default shiny apps
 RUN rm -rf /srv/shiny-server/*
