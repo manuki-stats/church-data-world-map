@@ -13,9 +13,9 @@ RUN apt-get update && apt-get install -y \
     libmagick++-dev \
     cmake \
     wget \
+    unzip \
     libfontconfig1 \
     libfreetype6 \
-    chromium-browser \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
     libatspi2.0-0 \
@@ -44,7 +44,12 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
-ENV CHROMOTE_CHROME=/usr/bin/chromium-browser
+# Install standalone Chromium from snapshots (avoids Snap issues)
+RUN wget -q https://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/$(wget -qO- https://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/LAST_CHANGE)/chrome-linux.zip \
+    && unzip chrome-linux.zip -d /opt/chromium \
+    && ln -s /opt/chromium/chrome-linux/chrome /usr/bin/chromium \
+    && rm chrome-linux.zip
+ENV CHROMOTE_CHROME=/usr/bin/chromium
 # Install required R packages (including spatial packages), replace webshot with webshot2
 RUN R -e "options(repos = c(CRAN = 'https://p3m.dev/cran/__linux__/jammy/latest')); \
     install.packages(c('shiny', 'leaflet', 'dplyr', 'readr', 'sf', 'DT', 'shinythemes', 'lwgeom', 'rnaturalearth', 'rnaturalearthdata', 'RColorBrewer', 'webshot2', 'writexl', 'plotly', 'shinyjs', 'viridisLite', 'ggplot2', 'htmlwidgets', 'purrr'))"
