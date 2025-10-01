@@ -1634,7 +1634,7 @@ server <- function(input, output, session) {
       temp_html <- tempfile(fileext = ".html")
       saveWidget(leaflet_obj, temp_html, selfcontained = TRUE)
       webshot2::webshot(temp_html, file = file, vwidth = 1600, vheight = 1000, 
-                        zoom = 1.5, delay = 2, browser_args = c("--no-sandbox", "--disable-gpu"))
+                        zoom = 1.5, delay = 2, browser_args = c("--no-sandbox", "--disable-gpu", "--disable-software-rasterizer", "--disable-dev-shm-usage"))
     }
   )
   

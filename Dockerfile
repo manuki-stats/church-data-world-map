@@ -47,6 +47,7 @@ RUN apt-get update && apt-get install -y \
 # Install standalone Chromium from snapshots (avoids Snap issues)
 RUN wget -q https://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/$(wget -qO- https://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/LAST_CHANGE)/chrome-linux.zip \
     && unzip chrome-linux.zip -d /opt/chromium \
+    && chmod +x /opt/chromium/chrome-linux/chrome \
     && ln -s /opt/chromium/chrome-linux/chrome /usr/bin/chromium \
     && rm chrome-linux.zip
 ENV CHROMOTE_CHROME=/usr/bin/chromium
