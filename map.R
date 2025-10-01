@@ -1,26 +1,26 @@
 # ---- Load Required Libraries ----
-# This section installs and loads all necessary packages for the Shiny app.
-# It checks if each package is installed and installs it if not, then loads them.
+# All packages are pre-installed in the Docker image
+library(shiny)
+library(leaflet)
+library(dplyr)
+library(readr)
+library(sf)
+library(DT)
+library(shinythemes)
+library(lwgeom)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(RColorBrewer)
+library(webshot)
+library(writexl)
+library(plotly)
+library(shinyjs)
+library(viridisLite)
+library(ggplot2)
+library(htmlwidgets)
+library(purrr)
 
-required_packages <- c(
-  "shiny", "leaflet", "dplyr", "readr", "sf", "DT", "shinythemes", "lwgeom",
-  "rnaturalearth", "rnaturalearthdata", "RColorBrewer", "webshot",
-  "writexl", "plotly", "shinyjs", "viridisLite", "ggplot2", "htmlwidgets", "purrr"
-)
-for (pkg in required_packages) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    install.packages(pkg)
-  }
-}
-
-# Load the libraries after ensuring they are installed.
-lapply(required_packages, library, character.only = TRUE)
 useShinyjs()
-# Ensure PhantomJS is installed for webshot functionality (used for map downloads).
-if (!webshot::is_phantomjs_installed()) {
-  webshot::install_phantomjs()
-}
-
 
 # ---- Docker Instructions ----
 # Set Shiny app to listen on all interfaces and a specific port for Docker compatibility.
@@ -38,8 +38,8 @@ if (file.exists("/srv/shiny-server/final_geo_table.csv")) {
   abbreviations_file <- "variable_abbreviations.csv"
 } else {
   # Local development environment
-  #path_outputs <- "C:/Users/schia/Documents/GitHub/Consulting_Catholic_Church"
-  path_outputs <- "C:/Users/soffi/Documents/Consulting_Catholic_Church"
+  path_outputs <- "C:/Users/schia/Documents/GitHub/Consulting_Catholic_Church"
+  #path_outputs <- "C:/Users/soffi/Documents/Consulting_Catholic_Church"
   setwd(path_outputs)
   data <- read.csv("final_geo_table.csv", check.names = FALSE)
   abbreviations_file <- file.path(path_outputs, "variable_abbreviations.csv")
@@ -1544,7 +1544,7 @@ server <- function(input, output, session) {
   })
   
   # ---- Handle Map Download ----
-  # Generate filename and content for downloading the map as PNG.
+  # Generate filename and content for downloading the map as interactive HTML.
   output$download_map <- downloadHandler(
     filename = function() {
       ml <- mode_label()
@@ -1552,7 +1552,7 @@ server <- function(input, output, session) {
              switch(ml,
                     "absolute" = "",
                     "per_capita" = "_per_capita",
-                    "per_catholic" = "_per_catholic"), ".png")
+                    "per_catholic" = "_per_catholic"), ".html")
     },
     content = function(file) {
       ml <- mode_label()
@@ -1575,7 +1575,7 @@ server <- function(input, output, session) {
                   position = "bottomleft") %>%
         addControl(
           html = paste0("<div style='font-size:20px; font-weight:bold; background-color:rgba(255,255,255,0.7);
-                  padding:6px 12px; border-radius:6px;'>",
+                padding:6px 12px; border-radius:6px;'>",
                         switch(ml,
                                "absolute" = input$variable,
                                "per_capita" = paste(input$variable, "per thousand inhabitants"),
@@ -1585,49 +1585,38 @@ server <- function(input, output, session) {
         ) %>%
         addControl(
           html = "<div style='font-size:13px; background-color:rgba(255,255,255,0.6); padding:4px 10px;
-            border-radius:5px;'>Source: Annuarium Statisticum Ecclesiae</div>",
+          border-radius:5px;'>Source: Annuarium Statisticum Ecclesiae</div>",
           position = "bottomright"
         ) %>%
         htmlwidgets::onRender("
-        function(el, x) {
-          var style = document.createElement('style');
-          style.innerHTML = `
-            .small-legend {
-              font-size: 10px !important;
-            }
-            .small-legend .legend {
-              line-height: 14px !important;
-              font-size: 10px !important;
-            }
-            .small-legend .legend i {
-              width: 10px !important;
-              height: 10px !important;
-              margin-right: 3px !important;
-            }
-            .small-legend .legend .legend-title {
-              font-size: 11px !important;
-              font-weight: bold !important;
-              margin-bottom: 3px !important;
-            }
-          `;
-          document.head.appendChild(style);
-        }
-      ")
-      temp_html <- tempfile(fileext = ".html")
-      saveWidget(leaflet_obj, temp_html, selfcontained = TRUE)
-      webshot::webshot(temp_html, file = file, vwidth = 1600, vheight = 1000)
+      function(el, x) {
+        var style = document.createElement('style');
+        style.innerHTML = `
+          .small-legend {
+            font-size: 10px !important;
+          }
+          .small-legend .legend {
+            line-height: 14px !important;
+            font-size: 10px !important;
+          }
+          .small-legend .legend i {
+            width: 10px !important;
+            height: 10px !important;
+            margin-right: 3px !important;
+          }
+          .small-legend .legend .legend-title {
+            font-size: 11px !important;
+            font-weight: bold !important;
+            margin-bottom: 3px !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    ")
+      
+      htmlwidgets::saveWidget(leaflet_obj, file, selfcontained = TRUE)
     }
   )
-  
-  # ---- Time Series Region Selector UI ----
-  # Dynamically render region selector based on level (Country or Macroregion).
-  output$ts_region_selector <- renderUI({
-    if (input$ts_level == "countries") {
-      create_select_input("ts_regions", "Select country/countries:", sort(unique(data_countries$country)), multiple = TRUE)
-    } else {
-      create_select_input("ts_regions", "Displayed macroregions (remove any to filter):", TARGET_REGIONS, selected = TARGET_REGIONS, multiple = TRUE)
-    }
-  })
   
   # ---- Handle Map Click Events ----
   # Highlight clicked country and update selections.
