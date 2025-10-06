@@ -1,5 +1,6 @@
 # ---- Load Required Libraries ----
 # All packages are pre-installed in the Docker image
+
 library(shiny)
 library(leaflet)
 library(dplyr)
@@ -24,7 +25,7 @@ useShinyjs()
 
 
 # ---- Docker Instructions ----
-# Set Shiny app to listen on all interfaces and a specific port for Docker compatibility.
+# Set Shiny app to listen on all interfaces and a specific port for Docker.
 
 options(shiny.host = "0.0.0.0")
 options(shiny.port = 3838)
@@ -32,6 +33,7 @@ options(shiny.port = 3838)
 
 # ---- Load the Data ----
 # Update paths for Docker environment
+
 if (file.exists("/srv/shiny-server/final_geo_table.csv")) {
   # Docker environment
   setwd("/srv/shiny-server")
@@ -39,14 +41,15 @@ if (file.exists("/srv/shiny-server/final_geo_table.csv")) {
   abbreviations_file <- "variable_abbreviations.csv"
 } else {
   # Local development environment
-  path_outputs <- "C:/Users/schia/Documents/GitHub/world-map/church-data-map-world-main"
-  #path_outputs <- "C:/Users/soffi/Documents/Consulting_Catholic_Church"
+  #path_outputs <- "C:/Users/schia/Documents/GitHub/world-map/church-data-map-world-main"
+  path_outputs <- "C:/Users/soffi/Documents/Consulting_Catholic_Church"
   setwd(path_outputs)
   data <- read.csv("final_geo_table.csv", check.names = FALSE)
   abbreviations_file <- file.path(path_outputs, "variable_abbreviations.csv")
 }
 
 # ---- Define Variable Abbreviations ----
+
 if (!file.exists(abbreviations_file)) {
   stop("Variable abbreviations CSV file not found at: ", abbreviations_file)
 }
@@ -181,6 +184,7 @@ assign_macroregion <- function(country_names) {
 
 # ---- Process and Merge Macroregions ----
 # Standardize names, merge split regions, and filter out aggregates
+
 data_macroregions <- data_macroregions %>%
   mutate(macroregion = case_when(
     macroregion %in% c("Central America (Mainland)", "Central America (Antilles)") ~ "Central America",
@@ -189,7 +193,7 @@ data_macroregions <- data_macroregions %>%
     TRUE ~ macroregion
   )) %>%
   filter(!macroregion %in% c("World", "America", "Asia")) %>%
-  mutate(Year = suppressWarnings(as.integer(Year))) %>%  # Ensure Year is integer, matching country processing
+  mutate(Year = suppressWarnings(as.integer(Year))) %>% 
   group_by(macroregion, Year) %>%
   summarise(
     across(
@@ -201,6 +205,7 @@ data_macroregions <- data_macroregions %>%
 
 # ---- Recompute Derived Variables for Macroregions ----
 # Shorthand for data_macroregions to simplify recomputations.
+
 dm <- data_macroregions
 # Recompute density and rates, rounding to 2 decimal places.
 if (all(c("Inhabitants per km^2", "Inhabitants in thousands", "Area in km^2") %in% names(dm))) {
@@ -360,6 +365,8 @@ data_macroregions <- dm
 # Extract country data.
 data_countries <- data_filtered %>%
   filter(`Region type` == "Country")
+
+
 # ---- Load and Prepare World Map ----
 # Load world map data from Natural Earth as an sf object.
 
@@ -375,7 +382,7 @@ world <- world %>%
   filter(!admin %in% c("Somalia", "Somaliland")) %>%
   bind_rows(somalia_unified)
 
-# --- Handle composites by merging map_units up to your country names ---
+# --- Handle composites by merging map_units up to country names ---
 
 # Map Natural Earth sub-units -> your desired country labels
 bridge_overrides <- tribble(
@@ -459,7 +466,7 @@ world_custom <- world_bridge %>%
   group_by(Region_bridge) %>%
   summarise(geometry = sf::st_union(geometry), .groups = "drop") %>%
   mutate(geometry = st_make_valid(geometry)) %>%  # Validate after union
-  mutate(geometry = st_wrap_dateline(geometry, options = c("WRAPDATELINE=YES", "DATELINEOFFSET=20")))  # Wrap after validation
+  mutate(geometry = st_wrap_dateline(geometry, options = c("WRAPDATELINE=YES", "DATELINEOFFSET=20"))) 
 
 
 # ---- Define Excluded Variables for Map Tab ----
@@ -501,7 +508,8 @@ macroregion_polygons <- world_with_macroregions %>%
     .groups = "drop"
   ) %>%
   mutate(geometry = st_make_valid(geometry)) %>%  # Validate after union
-  mutate(geometry = st_wrap_dateline(geometry, options = c("WRAPDATELINE=YES", "DATELINEOFFSET=20")))  # Wrap after validation
+  mutate(geometry = st_wrap_dateline(geometry, options = c("WRAPDATELINE=YES", 
+                                                           "DATELINEOFFSET=20"))) 
 
 # Merge with macroregion data
 map_data_macroregions <- left_join(
@@ -526,6 +534,7 @@ time_series_vars_macroregions <- allowed_variables_macroregions[
     length(years) > 1
   })
 ]
+
 
 # ---- Analyze Unmatched Country Names ----
 # Identify countries in data that do not match the world map.
@@ -593,6 +602,7 @@ name_corrections <- c(
   "Western Sahara"                   = "W. Sahara"
 )
 
+
 # ---- Complete Country Name Standardization ----
 # First, apply name corrections to create the 'country' column
 data_countries <- data_countries %>%
@@ -647,6 +657,7 @@ data_countries <- data_countries %>%
   )
 
 dc <- data_countries
+
 
 # ---- Define Allowed Variables for Map Tab ----
 # Select numeric variables excluding 'Year' and those in excluded_vars.
@@ -879,6 +890,7 @@ time_series_vars <- allowed_variables[
   })
 ]
 
+
 # ---- UI Layout ----
 # Prepare country choices for the search input.
 
@@ -888,9 +900,11 @@ country_choices_list <- as.list(all_countries)
 names(country_choices_list) <- all_countries
 final_country_dropdown_choices <- c("Type to search..." = "", country_choices_list)
 
+
 # ---- Helper Functions for UI ----
 # Helper function to create select inputs for variables, years, or countries.
-create_select_input <- function(id, label, choices, selected = NULL, multiple = FALSE, placeholder = NULL) {
+create_select_input <- function(id, label, choices, selected = NULL, multiple = FALSE, 
+                                placeholder = NULL) {
   if (!is.null(placeholder)) {
     selectizeInput(
       inputId = id,
@@ -920,12 +934,15 @@ create_download_buttons <- function() {
   )
 }
 
+
 # ---- Helper Functions for Server Logic ----
 # Helper function to format values for display (e.g., map hover labels, country info).
+
 format_value <- function(value, mode) {
   ifelse(mode != "absolute" & value == 0,
          "<0.01",
-         formatC(round(as.numeric(value), ifelse(mode == "absolute", 0, 2)), format = "f", digits = ifelse(mode == "absolute", 0, 2), big.mark = ","))
+         formatC(round(as.numeric(value), ifelse(mode == "absolute", 0, 2)), format = "f", 
+                 digits = ifelse(mode == "absolute", 0, 2), big.mark = ","))
 }
 
 # Helper function to create color palette for map visualizations.
@@ -1125,7 +1142,7 @@ TARGET_REGIONS <- c(
 )
 standardize_macro <- function(df, col = "macroregion") {
   df %>%
-    filter(!.data[[col]] %in% c("World", "America", "Asia")) %>% # drop aggregates
+    filter(!.data[[col]] %in% c("World", "America", "Asia")) %>%
     mutate(
       macro_simplified = dplyr::case_when(
         .data[[col]] %in% c("Central America (Mainland)", "Central America (Antilles)") ~ "Central America",
@@ -1221,10 +1238,10 @@ server <- function(input, output, session) {
     if (input$geographic_level == "countries") {
       data <- current_map_data() %>% filter(Year == input$year)
     } else {
-      # Use full macroregion polygons (no holes) - revert to original approach
+      # Use full macroregion polygons
       data <- map_data_macroregions %>% filter(Year == input$year)
       
-      # But recalculate aggregations using only countries with data for this variable
+      # Recalculate aggregations using only countries with data for this variable
       countries_with_data <- coverage_matrix %>%
         filter(variable == input$variable, year == input$year, has_data == TRUE) %>%
         pull(country)
@@ -1545,6 +1562,7 @@ server <- function(input, output, session) {
   })
   
   # ---- Handle Map Download ----
+  # Generate filename and content for downloading the map as PNG.
   output$download_map <- downloadHandler(
     filename = function() {
       ml <- mode_label()
@@ -1587,7 +1605,16 @@ server <- function(input, output, session) {
             col = "white",
             lwd = 0.5
           ) +
-          tm_title(title_text, position = c("left", "top"), size = 1.2) +
+          tm_title(title_text, 
+                   position = c("right", "top"), 
+                   size = 1.2,
+                   color = "black",
+                   bg = TRUE,
+                   bg.color = "white",
+                   bg.alpha = 1,
+                   frame = TRUE,
+                   frame.color = "black",
+                   frame.lwd = 1) +
           tm_layout(
             legend.position = c("left", "bottom"),
             frame = FALSE,
@@ -1598,12 +1625,12 @@ server <- function(input, output, session) {
             design.mode = FALSE
           )
         
-        # Save to PNG - use higher width for world map aspect ratio
-        tmap_save(tm_map, 
-                  filename = file, 
-                  width = 2400,   # Increased width
-                  height = 1000,  # Keep height
-                  units = "px", 
+        # Save to PNG
+        tmap_save(tm_map,
+                  filename = file,
+                  width = 2400,
+                  height = 1000,
+                  units = "px",
                   dpi = 150)
         
       }, error = function(e) {
@@ -1843,6 +1870,7 @@ server <- function(input, output, session) {
       HTML("")
     }
   })
+  
   # ---- Render Macroregion Histogram ----
   output$varPlot <- renderPlot({
     
